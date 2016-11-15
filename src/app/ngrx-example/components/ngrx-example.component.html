@@ -1,0 +1,11 @@
+<div>
+    <h2>NgRx Example</h2>
+    <form #inputForm="ngForm" (ngSubmit)="addInput(inputForm, $event)">
+        <label for="myInput">Input Here</label>
+        <input type="myInput" name="myInput" id="myInput" ngModel>
+        <button type="submit">Add Input</button>
+    </form>
+    <ul>
+        <li *ngFor="let input of inputs | async" (click)="removeInput(input.id)" class="ngrxInput"> {{ input.data }} </li>
+    </ul>
+</div>

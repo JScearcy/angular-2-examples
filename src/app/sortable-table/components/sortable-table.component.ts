@@ -19,6 +19,14 @@ export class SortableTableComponent {
     private sortDirection: number = 1;
     private sortIndex: number;
 
+    get sortUp() {
+        return this.sortDirection === 1;
+    }
+
+    get sortDown() {
+        return this.sortDirection === -1;
+    }
+
     sort(index: number) {
         [ this.sortIndex, this.sortDirection ] = this.trackSort(index);
         this.internalTableData.rows.sort((a, b) => this.sortHandler(a, b, index));

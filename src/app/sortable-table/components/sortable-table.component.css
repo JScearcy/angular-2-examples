@@ -38,3 +38,7 @@ table td {
 	top: 0;
 	transform: rotate(135deg);
 }
+
+.red {
+	background-color: red;
+}
