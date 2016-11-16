@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { TinyNgStore, StoreItem, TnsObservable } from 'tiny-ng-store/tiny-ng-store';
+// Import the exposed objects from the tiny-ng-store package
+import { TinyNgStore, StoreItem, TnsState } from 'tiny-ng-store/tiny-ng-store';
 import 'rxjs/add/operator/take';
 
 import { InputModel } from '../../ngrx-example/models/input.model';
@@ -13,21 +14,32 @@ import { InputModel } from '../../ngrx-example/models/input.model';
     styleUrls: [ './tngs-example.component.css' ]
 })
 export class TngsExampleComponent implements OnInit {
-    inputs: TnsObservable<InputModel[]>;
+    // Create a variable for TnsState
+    inputs: TnsState<InputModel[]>;
     constructor(private store: TinyNgStore) {}
-
+    // When an input is added, update the data store to match new data
     addInput(form: NgForm, event: any) {
         event.preventDefault();
         let input = new InputModel(form.value.myInput, this.randomId());
-        this.inputs.take(1).subscribe((s: InputModel[]) => this.store.UpdateItem({ name: 'inputs', data: [...s, input] }));
-    }
-
-    removeInput(id: number) {
-        console.log(id);
-        this.inputs.take(1).subscribe((s: InputModel[]) => {
-            let newInputs = s.filter(inp => inp.id !== id);
-            this.store.UpdateItem({ name: 'inputs', data: newInputs });
+        let inputs;
+        /****************** Note avoid updating the state within the subscribe block to avoid infinite loops *******************/
+        // Extract current state from the store
+        this.inputs.subscribe((s: InputModel[]) => {
+            inputs = s;
         });
+        // Update the store with the new state
+        this.store.UpdateItem({ name: 'inputs', data: [...inputs, input] });
+    }
+    // When an input is set to be deleted, update the data store to match new data
+    removeInput(id: number) {
+        let inputs;
+        /****************** Note avoid updating the state within the subscribe block to avoid infinite loops *******************/
+        // Extract current state from the store
+        this.inputs.subscribe((s: InputModel[]) => {
+            inputs = s.filter(item => item.id !== id);
+        });
+        // Update the store with the new state
+        this.store.UpdateItem({ name: 'inputs', data: inputs });
     }
 
     randomId(): number {
@@ -35,6 +47,7 @@ export class TngsExampleComponent implements OnInit {
     }
 
     ngOnInit() {
+        // Add the inputs object into the store, and store the returned TnsState within the inputs variable
         this.inputs = this.store
                 .InsertItem({data: [], name: 'inputs' })
                 .map((s: StoreItem): InputModel[] => s && s.data);
